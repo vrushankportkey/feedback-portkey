@@ -1,10 +1,7 @@
 
 import streamlit as st
-from streamlit.logger import get_logger
-from streamlit_feedback import streamlit_feedback
 from portkey_ai import Portkey
 
-LOGGER = get_logger(__name__)
 PORTKEY_API_KEY = st.text_input("Portkey API key")
 VIRTUAL_KEY = st.text_input("Virtual Key")
 st.link_button("Go to Portkey", "https://www.portkey.ai")
