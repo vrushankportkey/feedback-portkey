@@ -14,38 +14,45 @@
 
 import streamlit as st
 from streamlit.logger import get_logger
+from streamlit_feedback import streamlit_feedback
+from portkey_ai import Portkey
 
 LOGGER = get_logger(__name__)
+PORTKEY_API_KEY = st.text_input("Portkey API key")
+VIRTUAL_KEY = st.text_input("Virtual Key")
+st.link_button("Go to Portkey", "https://www.portkey.ai")
+st.markdown("""💡Ensure you fill above fields before generating a tweet""")
+
+portkey = Portkey(
+    api_key=PORTKEY_API_KEY,
+    virtual_key=VIRTUAL_KEY
+)
+
+def generate_tweet():
+    response = portkey.with_options(
+        trace_id="trace_for_feedback"
+    ).chat.completions.create(
+    messages = [{ "role": 'user', "content": 'Generate a random tweet' }],
+    model = 'gpt-3.5-turbo'
+)
+    tweet = response['choices'][0]['message']['content']
+    st.markdown(f'### {tweet}')
+    
+def send_feedback(no_of_stars=None):
+    portkey.feedback.create(
+    trace_id="trace_for_feedback",
+    value=no_of_stars, 
+)
 
 
 def run():
-    st.set_page_config(
-        page_title="Hello",
-        page_icon="👋",
-    )
-
-    st.write("# Welcome to Streamlit! 👋")
-
-    st.sidebar.success("Select a demo above.")
-
-    st.markdown(
-        """
-        Streamlit is an open-source app framework built specifically for
-        Machine Learning and Data Science projects.
-        **👈 Select a demo from the sidebar** to see some examples
-        of what Streamlit can do!
-        ### Want to learn more?
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into our [documentation](https://docs.streamlit.io)
-        - Ask a question in our [community
-          forums](https://discuss.streamlit.io)
-        ### See more complex demos
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset](https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
-    """
-    )
-
+    st.divider()
+    st.header("Tweet generator 👋")
+    st.button("Generate", on_click=generate_tweet())
+    number = st.slider("Rate the Tweet", 0, 5)
+    st.text(f"Rated {number} stars ⭐️")
+    st.button("Submit Rating", on_click=send_feedback(no_of_stars=number))
+    st.text("Feedback Saved")
 
 if __name__ == "__main__":
     run()
